@@ -7,12 +7,11 @@ import ch.heigvd.res.labio.interfaces.IFileExplorer;
 import ch.heigvd.res.labio.interfaces.IFileVisitor;
 import ch.heigvd.res.labio.quotes.QuoteClient;
 import ch.heigvd.res.labio.quotes.Quote;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -26,6 +25,7 @@ public class Application implements IApplication {
    * to where the Java application is invoked.
    */
   public static String WORKSPACE_DIRECTORY = "./workspace/quotes";
+  public static char SEPARATOR = '/';
   
   private static final Logger LOG = Logger.getLogger(Application.class.getName());
   
@@ -84,12 +84,9 @@ public class Application implements IApplication {
     QuoteClient client = new QuoteClient();
     for (int i = 0; i < numberOfQuotes; i++) {
       Quote quote = client.fetchQuote();
-      /* There is a missing piece here!
-       * As you can see, this method handles the first part of the lab. It uses the web service
-       * client to fetch quotes. We have removed a single line from this method. It is a call to
-       * one method provided by this class, which is responsible for storing the content of the
-       * quote in a text file (and for generating the directories based on the tags).
-       */
+
+      storeQuote(quote, "quote-" + String.valueOf(i) + ".utf8");
+
       LOG.info("Received a new joke with " + quote.getTags().size() + " tags.");
       for (String tag : quote.getTags()) {
         LOG.info("> " + tag);
@@ -123,8 +120,34 @@ public class Application implements IApplication {
    * @throws IOException 
    */
   void storeQuote(Quote quote, String filename) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
-  }
+    //plus rapide que String avec la méthode append() dans une boucle.
+    StringBuilder path = new StringBuilder(WORKSPACE_DIRECTORY);
+
+    for (String tagQuote : quote.getTags()) {
+      path.append(SEPARATOR).append(tagQuote);
+    }
+
+    path.append(SEPARATOR).append(filename);
+    File file = new File(path.toString());
+
+    file.getParentFile().mkdirs();
+
+    FileOutputStream fops = new FileOutputStream(file);
+
+    //vérifie que le fichier existe
+    if (!file.exists()) {
+      LOG.log(Level.SEVERE, "We can not create the directory");
+      throw new RuntimeException("We can not create the directory");
+    }
+
+    //écrit le fichier avec UTF-8 comme encodage
+    OutputStreamWriter writer = new OutputStreamWriter(fops, Charsets.UTF_8);
+    writer.write(quote.getQuote());
+    writer.flush();
+    writer.close();
+
+
+}
   
   /**
    * This method uses a IFileExplorer to explore the file system and prints the name of each
@@ -140,6 +163,12 @@ public class Application implements IApplication {
          * of the the IFileVisitor interface inline. You just have to add the body of the visit method, which should
          * be pretty easy (we want to write the filename, including the path, to the writer passed in argument).
          */
+        try {
+          writer.write(file.getPath() + "\n");
+        } catch (IOException ex) {
+          LOG.log(Level.SEVERE, "Could not fetch quotes. {0}", ex.getMessage());
+          ex.printStackTrace();
+        }
       }
     });
   }

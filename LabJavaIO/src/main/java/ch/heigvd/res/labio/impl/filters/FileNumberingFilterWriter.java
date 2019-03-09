@@ -21,8 +21,8 @@ public class FileNumberingFilterWriter extends FilterWriter {
   private int line = 1;
   private int previous = 0;
   private static final char TABULATION = '\t';
-  private static final char LINEFEED = '\n';
-  private static final char CARRIAGERETURN = '\r';
+  private static final char LINE_FEED = '\n';
+  private static final char CARRIAGE_RETURN = '\r';
 
   public FileNumberingFilterWriter(Writer out) {
     super(out);
@@ -51,7 +51,7 @@ public class FileNumberingFilterWriter extends FilterWriter {
       super.write(c);
     } else {
       //si c'est un mac (qui utilise le \r)
-      if (previous == CARRIAGERETURN && c != LINEFEED) {
+      if (previous == CARRIAGE_RETURN && c != LINE_FEED) {
         super.write(strToWrite, 0, strToWrite.length());
         super.write(TABULATION);
         ++line;
@@ -60,7 +60,7 @@ public class FileNumberingFilterWriter extends FilterWriter {
       super.write(c);
 
       //si c'est un windows ou unix (qui utilise le \n)
-      if (c == LINEFEED) {
+      if (c == LINE_FEED) {
         super.write(strToWrite, 0, strToWrite.length());
         super.write(TABULATION);
         ++line;
