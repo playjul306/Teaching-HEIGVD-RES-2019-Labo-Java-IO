@@ -18,6 +18,11 @@ import java.util.logging.Logger;
 public class FileNumberingFilterWriter extends FilterWriter {
 
   private static final Logger LOG = Logger.getLogger(FileNumberingFilterWriter.class.getName());
+  private int line = 1;
+  private int previous = 0;
+  private static final char TABULATION = '\t';
+  private static final char LINEFEED = '\n';
+  private static final char CARRIAGERETURN = '\r';
 
   public FileNumberingFilterWriter(Writer out) {
     super(out);
@@ -25,17 +30,43 @@ public class FileNumberingFilterWriter extends FilterWriter {
 
   @Override
   public void write(String str, int off, int len) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
-  }
+    write(str.toCharArray(),off,len);  }
 
   @Override
   public void write(char[] cbuf, int off, int len) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+    for (int j = 0; j < len; j++){
+      write(cbuf[off + j]);
+    }
   }
 
   @Override
   public void write(int c) throws IOException {
-    throw new UnsupportedOperationException("The student has not implemented this method yet.");
+
+    String strToWrite = String.valueOf(line);
+
+    if(line == 1){
+      super.write(strToWrite,0, strToWrite.length());
+      super.write(TABULATION);
+      ++line;
+      super.write(c);
+    } else {
+      //si c'est un mac (qui utilise le \r)
+      if (previous == CARRIAGERETURN && c != LINEFEED) {
+        super.write(strToWrite, 0, strToWrite.length());
+        super.write(TABULATION);
+        ++line;
+      }
+
+      super.write(c);
+
+      //si c'est un windows ou unix (qui utilise le \n)
+      if (c == LINEFEED) {
+        super.write(strToWrite, 0, strToWrite.length());
+        super.write(TABULATION);
+        ++line;
+      }
+    }
+    previous = c;
   }
 
 }
