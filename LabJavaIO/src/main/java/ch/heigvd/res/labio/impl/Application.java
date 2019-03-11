@@ -16,7 +16,7 @@ import org.apache.commons.io.FileUtils;
 
 /**
  *
- * @author Olivier Liechti
+ * @author Olivier Liechti, Julien Benoit
  */
 public class Application implements IApplication {
 
@@ -25,7 +25,7 @@ public class Application implements IApplication {
    * to where the Java application is invoked.
    */
   public static String WORKSPACE_DIRECTORY = "./workspace/quotes";
-  public static char SEPARATOR = '/';
+  public final char SEPARATOR = '/';
   
   private static final Logger LOG = Logger.getLogger(Application.class.getName());
   
@@ -123,6 +123,7 @@ public class Application implements IApplication {
     //plus rapide que String avec la méthode append() dans une boucle.
     StringBuilder path = new StringBuilder(WORKSPACE_DIRECTORY);
 
+    //crée le chemin d'un fichier avec ses tags.
     for (String tagQuote : quote.getTags()) {
       path.append(SEPARATOR).append(tagQuote);
     }
@@ -130,6 +131,7 @@ public class Application implements IApplication {
     path.append(SEPARATOR).append(filename);
     File file = new File(path.toString());
 
+    //permet de créer toute l'arboresscence de fichier pour un fichier.
     file.getParentFile().mkdirs();
 
     FileOutputStream fops = new FileOutputStream(file);
@@ -158,11 +160,7 @@ public class Application implements IApplication {
     explorer.explore(new File(WORKSPACE_DIRECTORY), new IFileVisitor() {
       @Override
       public void visit(File file) {
-        /*
-         * There is a missing piece here. Notice how we use an anonymous class here. We provide the implementation
-         * of the the IFileVisitor interface inline. You just have to add the body of the visit method, which should
-         * be pretty easy (we want to write the filename, including the path, to the writer passed in argument).
-         */
+
         try {
           writer.write(file.getPath() + "\n");
         } catch (IOException ex) {

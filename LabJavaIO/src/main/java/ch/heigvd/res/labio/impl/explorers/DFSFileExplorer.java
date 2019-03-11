@@ -11,30 +11,25 @@ import java.util.Arrays;
  * node (file and directory). When the explorer reaches a directory, it visits all
  * files in the directory and then moves into the subdirectories.
  * 
- * @author Olivier Liechti
+ * @author Olivier Liechti, Julien Benoit
  */
 public class DFSFileExplorer implements IFileExplorer {
 
   @Override
   public void explore(File rootDirectory, IFileVisitor vistor) {
-    if (rootDirectory != null) {
+
       vistor.visit(rootDirectory);
 
       if (rootDirectory.isDirectory()) {
         File[] ArrayOfFiles = rootDirectory.listFiles();
         Arrays.sort(ArrayOfFiles);
 
+        //explore récursivement tout les dossiers ou fichier afin d'appeler la méthode visit sur ce dernier.
         for (File file : ArrayOfFiles){
-
-          if (!file.isDirectory()){
-            vistor.visit(file);
-          } else {
-            explore(file,vistor);
-          }
+          explore(file,vistor);
         }
       }
-    }
-    return;
+
   }
 
 }
